@@ -1,20 +1,27 @@
 {
-  "name": "kraze-client",
-  "version": "0.1.0",
+  "name": "kraze-store-frontend",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3002",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "next lint"
   },
   "dependencies": {
-    "next": "16.1.4",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "next": "14.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "axios": "^1.6.7",
+    "framer-motion": "^11.0.3",
+    "react-icons": "^5.0.1",
+    "swiper": "^11.0.5"
   },
   "devDependencies": {
-    "eslint": "^9",
-    "eslint-config-next": "16.1.4"
+    "autoprefixer": "^10.4.17",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "14.1.0",
+    "postcss": "^8.4.33",
+    "tailwindcss": "^3.4.1"
   }
 }
