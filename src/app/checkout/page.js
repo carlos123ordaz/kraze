@@ -7,8 +7,9 @@ import { useAuth } from '../../context/AuthContext'
 import { FiCheck, FiX, FiShoppingBag, FiTruck, FiCreditCard } from 'react-icons/fi'
 import axios from 'axios'
 import Image from 'next/image'
+import { API_URL } from '../config'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+
 
 export default function CheckoutPage() {
     const router = useRouter()
@@ -239,8 +240,8 @@ export default function CheckoutPage() {
             {notification && (
                 <div className="fixed top-4 right-4 z-50 animate-slide-in">
                     <div className={`flex items-start gap-3 p-4 rounded-lg shadow-lg max-w-md ${notification.type === 'success'
-                            ? 'bg-green-50 border border-green-200'
-                            : 'bg-red-50 border border-red-200'
+                        ? 'bg-green-50 border border-green-200'
+                        : 'bg-red-50 border border-red-200'
                         }`}>
                         <div className={`flex-shrink-0 ${notification.type === 'success' ? 'text-green-600' : 'text-red-600'
                             }`}>
@@ -536,8 +537,8 @@ export default function CheckoutPage() {
 
                                 <div className="space-y-3">
                                     <label className={`block p-4 border-2 rounded-md cursor-pointer transition-all ${formData.metodoPago === 'mercado_pago'
-                                            ? 'border-black bg-blue-50'
-                                            : 'border-gray-300 hover:border-gray-400'
+                                        ? 'border-black bg-blue-50'
+                                        : 'border-gray-300 hover:border-gray-400'
                                         }`}>
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
@@ -561,8 +562,8 @@ export default function CheckoutPage() {
                                     </label>
 
                                     <label className={`block p-4 border-2 rounded-md cursor-pointer transition-all ${formData.metodoPago === 'transferencia'
-                                            ? 'border-black bg-blue-50'
-                                            : 'border-gray-300 hover:border-gray-400'
+                                        ? 'border-black bg-blue-50'
+                                        : 'border-gray-300 hover:border-gray-400'
                                         }`}>
                                         <div className="flex items-center gap-3">
                                             <input
@@ -578,8 +579,8 @@ export default function CheckoutPage() {
                                     </label>
 
                                     <label className={`block p-4 border-2 rounded-md cursor-pointer transition-all ${formData.metodoPago === 'yape'
-                                            ? 'border-black bg-blue-50'
-                                            : 'border-gray-300 hover:border-gray-400'
+                                        ? 'border-black bg-blue-50'
+                                        : 'border-gray-300 hover:border-gray-400'
                                         }`}>
                                         <div className="flex items-center gap-3">
                                             <input
@@ -595,8 +596,8 @@ export default function CheckoutPage() {
                                     </label>
 
                                     <label className={`block border-2 rounded-md cursor-pointer transition-all ${formData.metodoPago === 'contra_entrega'
-                                            ? 'border-black bg-blue-50'
-                                            : 'border-gray-300 hover:border-gray-400'
+                                        ? 'border-black bg-blue-50'
+                                        : 'border-gray-300 hover:border-gray-400'
                                         }`}>
                                         <div className="p-4">
                                             <div className="flex items-center gap-3">

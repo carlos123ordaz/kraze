@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '../../../context/AuthContext'
 import { FiArrowLeft, FiPlus, FiEdit, FiTrash2, FiCheck, FiX, FiMapPin, FiHome, FiBriefcase } from 'react-icons/fi'
 import axios from 'axios'
+import { API_URL } from '@/app/config'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+
 
 export default function DireccionesPage() {
     const router = useRouter()
@@ -198,8 +199,8 @@ export default function DireccionesPage() {
                 {notification && (
                     <div className="fixed top-4 right-4 z-50 animate-slide-in">
                         <div className={`flex items-start gap-3 p-4 rounded-lg shadow-lg max-w-md ${notification.type === 'success'
-                                ? 'bg-green-50 border border-green-200'
-                                : 'bg-red-50 border border-red-200'
+                            ? 'bg-green-50 border border-green-200'
+                            : 'bg-red-50 border border-red-200'
                             }`}>
                             <div className={`flex-shrink-0 ${notification.type === 'success' ? 'text-green-600' : 'text-red-600'
                                 }`}>
@@ -377,8 +378,8 @@ export default function DireccionesPage() {
                                                 <label
                                                     key={option.value}
                                                     className={`flex flex-col items-center justify-center p-4 border-2 rounded-xl cursor-pointer transition-all ${formData.label === option.value
-                                                            ? 'border-black bg-black text-white'
-                                                            : 'border-gray-300 hover:border-gray-400'
+                                                        ? 'border-black bg-black text-white'
+                                                        : 'border-gray-300 hover:border-gray-400'
                                                         }`}
                                                 >
                                                     <input

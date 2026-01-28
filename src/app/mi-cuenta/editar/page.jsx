@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '../../../context/AuthContext'
 import { FiArrowLeft, FiCheck, FiX } from 'react-icons/fi'
 import axios from 'axios'
+import { API_URL } from '@/app/config'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
 
 export default function EditarPerfilPage() {
     const router = useRouter()
@@ -86,8 +86,8 @@ export default function EditarPerfilPage() {
             {notification && (
                 <div className="fixed top-4 right-4 z-50 animate-slide-in">
                     <div className={`flex items-start gap-3 p-4 rounded-lg shadow-lg max-w-md ${notification.type === 'success'
-                            ? 'bg-green-50 border border-green-200'
-                            : 'bg-red-50 border border-red-200'
+                        ? 'bg-green-50 border border-green-200'
+                        : 'bg-red-50 border border-red-200'
                         }`}>
                         <div className={`flex-shrink-0 ${notification.type === 'success' ? 'text-green-600' : 'text-red-600'
                             }`}>

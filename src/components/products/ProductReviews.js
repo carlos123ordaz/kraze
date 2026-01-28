@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react'
 import { FiStar, FiThumbsUp, FiFlag, FiEdit, FiTrash2 } from 'react-icons/fi'
 import { useAuth } from '../../context/AuthContext'
 import axios from 'axios'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+import { API_URL } from '@/app/config'
 
 export default function ProductReviews({ productId }) {
     const { user } = useAuth()

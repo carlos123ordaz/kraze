@@ -5,8 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { FiArrowRight, FiTag, FiPackage } from 'react-icons/fi'
 import axios from 'axios'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+import { API_URL } from '../config'
 
 export default function ColeccionesPage() {
     const [collections, setCollections] = useState([])

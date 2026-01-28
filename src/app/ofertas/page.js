@@ -5,8 +5,7 @@ import ProductCard from '../../components/products/ProductCard'
 import { FiTag, FiClock, FiTrendingDown, FiPercent, FiGrid, FiList } from 'react-icons/fi'
 import axios from 'axios'
 import Link from 'next/link'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+import { API_URL } from '../config'
 
 export default function OfertasPage() {
     const [products, setProducts] = useState([])
@@ -180,8 +179,8 @@ export default function OfertasPage() {
                                 <button
                                     onClick={() => setViewMode('grid')}
                                     className={`p-2 rounded-md transition-colors ${viewMode === 'grid'
-                                            ? 'bg-white text-gray-900 shadow-sm'
-                                            : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-white text-gray-900 shadow-sm'
+                                        : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                     aria-label="Vista de cuadrícula"
                                 >
@@ -190,8 +189,8 @@ export default function OfertasPage() {
                                 <button
                                     onClick={() => setViewMode('list')}
                                     className={`p-2 rounded-md transition-colors ${viewMode === 'list'
-                                            ? 'bg-white text-gray-900 shadow-sm'
-                                            : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-white text-gray-900 shadow-sm'
+                                        : 'text-gray-600 hover:text-gray-900'
                                         }`}
                                     aria-label="Vista de lista"
                                 >

@@ -1,0 +1,1 @@
+export const API_URL = 'https://kraze-app-production.up.railway.app/api'

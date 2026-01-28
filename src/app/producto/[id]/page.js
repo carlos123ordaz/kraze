@@ -9,8 +9,7 @@ import axios from 'axios'
 import ProductGallery from '../../../components/products/ProductGallery'
 import ProductInfo from '../../../components/products/ProductInfo'
 import ProductReviews from '../../../components/products/ProductReviews'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+import { API_URL } from '@/app/config'
 
 export default function ProductPage() {
     const params = useParams()
@@ -147,8 +146,8 @@ export default function ProductPage() {
                             <button
                                 onClick={() => setActiveTab('description')}
                                 className={`flex-1 px-6 py-4 font-medium transition-colors ${activeTab === 'description'
-                                        ? 'text-gray-900 border-b-2 border-black'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'text-gray-900 border-b-2 border-black'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 Descripción
@@ -156,8 +155,8 @@ export default function ProductPage() {
                             <button
                                 onClick={() => setActiveTab('details')}
                                 className={`flex-1 px-6 py-4 font-medium transition-colors ${activeTab === 'details'
-                                        ? 'text-gray-900 border-b-2 border-black'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'text-gray-900 border-b-2 border-black'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 Detalles
@@ -165,8 +164,8 @@ export default function ProductPage() {
                             <button
                                 onClick={() => setActiveTab('shipping')}
                                 className={`flex-1 px-6 py-4 font-medium transition-colors ${activeTab === 'shipping'
-                                        ? 'text-gray-900 border-b-2 border-black'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                    ? 'text-gray-900 border-b-2 border-black'
+                                    : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 Envío y Devoluciones

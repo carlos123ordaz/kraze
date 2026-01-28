@@ -6,8 +6,7 @@ import ProductCard from '../../components/products/ProductCard'
 import ProductFilters from '../../components/products/ProductFilters'
 import { FiGrid, FiList, FiFilter, FiX } from 'react-icons/fi'
 import axios from 'axios'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+import { API_URL } from '../config'
 
 function ProductsContent() {
     const searchParams = useSearchParams()

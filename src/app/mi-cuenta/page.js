@@ -6,8 +6,7 @@ import { useAuth } from '../../context/AuthContext'
 import { FiUser, FiShoppingBag, FiMapPin, FiEdit, FiPlus, FiLogOut, FiPackage, FiClock, FiCheckCircle, FiTrendingUp, FiChevronRight } from 'react-icons/fi'
 import axios from 'axios'
 import Link from 'next/link'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+import { API_URL } from '../config'
 
 export default function MiCuentaPage() {
     const router = useRouter()
