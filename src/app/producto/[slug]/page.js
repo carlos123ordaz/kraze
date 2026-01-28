@@ -19,13 +19,13 @@ export default function ProductPage() {
 
     useEffect(() => {
         fetchProduct()
-    }, [params.id])
+    }, [params.slug])
 
     const fetchProduct = async () => {
         try {
             setLoading(true)
             console.log(params)
-            const { data } = await axios.get(`${API_URL}/products/slug/${params.id}`)
+            const { data } = await axios.get(`${API_URL}/products/slug/${params.slug}`)
             setProduct(data.producto)
         } catch (error) {
             console.error('Error:', error)
