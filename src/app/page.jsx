@@ -9,8 +9,6 @@ import axios from 'axios'
 import Image from 'next/image'
 import { API_URL } from './config'
 
-const API_URL = API_URL
-
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState([])
   const [newProducts, setNewProducts] = useState([])
