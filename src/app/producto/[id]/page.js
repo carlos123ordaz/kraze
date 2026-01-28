@@ -24,7 +24,8 @@ export default function ProductPage() {
     const fetchProduct = async () => {
         try {
             setLoading(true)
-            const { data } = await axios.get(`${API_URL}/products/${params.id}`)
+            console.log(params)
+            const { data } = await axios.get(`${API_URL}/products/slug/${params.id}`)
             setProduct(data.producto)
         } catch (error) {
             console.error('Error:', error)

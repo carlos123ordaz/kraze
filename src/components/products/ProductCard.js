@@ -49,7 +49,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
 
     if (viewMode === 'list') {
         return (
-            <Link href={`/producto/${product.slug || product._id}`} className="group">
+            <Link href={`/producto/${product.slug}`} className="group">
                 <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden">
                     <div className="flex flex-col sm:flex-row gap-4 p-4">
                         {/* Image */}
