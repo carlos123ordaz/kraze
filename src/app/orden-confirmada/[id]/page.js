@@ -209,8 +209,8 @@ export default function OrdenConfirmadaPage() {
                         <div className="flex justify-between">
                             <span className="text-accent">Estado:</span>
                             <span className={`font-medium ${orden.estado === 'pendiente_pago' ? 'text-yellow-600' :
-                                    orden.estado === 'confirmado' ? 'text-green-600' :
-                                        'text-primary'
+                                orden.estado === 'confirmado' ? 'text-green-600' :
+                                    'text-primary'
                                 }`}>
                                 {estadoNombres[orden.estado] || orden.estado}
                             </span>
@@ -226,7 +226,7 @@ export default function OrdenConfirmadaPage() {
                         </h3>
                         <div className="text-sm space-y-2 text-yellow-900">
                             <p>Por favor realiza el pago Yape al siguiente número:</p>
-                            <p className="text-2xl font-bold my-3">999 999 999</p>
+                            <p className="text-2xl font-bold my-3">904 435 631</p>
                             <p>Monto a pagar: <strong>S/ {orden.montos.total.toFixed(2)}</strong></p>
                             <p className="mt-4 pt-4 border-t border-yellow-300">
                                 Una vez realizado el pago, envía el comprobante por WhatsApp al mismo número

@@ -6,6 +6,7 @@ const CartContext = createContext()
 
 export function CartProvider({ children }) {
     const [cart, setCart] = useState([])
+    const [isSideCartOpen, setIsSideCartOpen] = useState(false)
 
     // Cargar carrito del localStorage al iniciar
     useEffect(() => {
@@ -41,7 +42,13 @@ export function CartProvider({ children }) {
 
             return [...prevCart, { product, variant, quantity }]
         })
+
+        // Abrir el carrito lateral cuando se agrega un producto
+        setIsSideCartOpen(true)
     }
+
+    const openSideCart = () => setIsSideCartOpen(true)
+    const closeSideCart = () => setIsSideCartOpen(false)
 
     const removeFromCart = (productId, variantId) => {
         setCart((prevCart) =>
@@ -93,6 +100,9 @@ export function CartProvider({ children }) {
                 clearCart,
                 getCartTotal,
                 getCartCount,
+                isSideCartOpen,
+                openSideCart,
+                closeSideCart,
             }}
         >
             {children}

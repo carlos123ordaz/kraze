@@ -1,43 +1,197 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
+import { FiHeart, FiShoppingCart } from 'react-icons/fi'
+import { useCart } from '../../context/CartContext'
+import { useState } from 'react'
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, viewMode = 'grid' }) {
+    const { addToCart } = useCart()
+    const [isAdding, setIsAdding] = useState(false)
+
+    const discountedPrice = product.descuento?.activo
+        ? product.precio * (1 - product.descuento.porcentaje / 100)
+        : null
+
+    const handleQuickAdd = async (e) => {
+        e.preventDefault()
+
+        // Verificar que el producto tenga variantes disponibles
+        if (!product.variantes || product.variantes.length === 0) {
+            alert('Este producto no tiene variantes disponibles')
+            return
+        }
+
+        // Buscar la primera variante con stock disponible
+        const availableVariant = product.variantes.find(v => v.stock > 0)
+
+        if (!availableVariant) {
+            alert('Este producto no tiene stock disponible')
+            return
+        }
+
+        setIsAdding(true)
+
+        try {
+            // Agregar al carrito con la primera variante disponible
+            addToCart(product, availableVariant, 1)
+
+            // Pequeña animación de feedback
+            setTimeout(() => {
+                setIsAdding(false)
+            }, 300)
+        } catch (error) {
+            console.error('Error al agregar al carrito:', error)
+            setIsAdding(false)
+        }
+    }
+
+    if (viewMode === 'list') {
+        return (
+            <Link href={`/producto/${product.slug || product._id}`} className="group">
+                <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                    <div className="flex flex-col sm:flex-row gap-4 p-4">
+                        {/* Image */}
+                        <div className="relative w-full sm:w-48 aspect-[3/4] sm:aspect-square overflow-hidden rounded-lg bg-gray-100 flex-shrink-0">
+                            <Image
+                                src={product.imagenesPrincipales?.[0]?.url || '/placeholder.jpg'}
+                                alt={product.nombre}
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                            {product.nuevo && (
+                                <span className="absolute top-3 left-3 bg-black text-white px-2 py-1 text-xs font-medium rounded">
+                                    NUEVO
+                                </span>
+                            )}
+                            {product.descuento?.activo && (
+                                <span className="absolute top-3 right-3 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">
+                                    -{product.descuento.porcentaje}%
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 flex flex-col justify-between">
+                            <div>
+                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+                                    {product.categoria?.nombre || 'Sin categoría'}
+                                </p>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-gray-700 transition-colors">
+                                    {product.nombre}
+                                </h3>
+                                {product.descripcion && (
+                                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                                        {product.descripcion}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    {discountedPrice ? (
+                                        <>
+                                            <span className="text-lg font-bold text-gray-900">
+                                                S/ {discountedPrice.toFixed(2)}
+                                            </span>
+                                            <span className="text-sm text-gray-500 line-through">
+                                                S/ {product.precio.toFixed(2)}
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <span className="text-lg font-bold text-gray-900">
+                                            S/ {product.precio.toFixed(2)}
+                                        </span>
+                                    )}
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={handleQuickAdd}
+                                        className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 text-sm font-medium disabled:opacity-50"
+                                        disabled={isAdding}
+                                    >
+                                        <FiShoppingCart size={16} />
+                                        {isAdding ? 'Agregado!' : 'Agregar'}
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.preventDefault()
+                                            // Add to wishlist logic
+                                        }}
+                                        className="p-2 border border-gray-300 rounded-full hover:border-gray-900 hover:bg-gray-50 transition-colors"
+                                        aria-label="Agregar a favoritos"
+                                    >
+                                        <FiHeart size={18} />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Link>
+        )
+    }
+
+    // Grid View (default)
     return (
         <Link href={`/producto/${product.slug || product._id}`} className="group">
-            <div className="relative aspect-[3/4] overflow-hidden bg-light-gray mb-3">
-                <Image
-                    src={product.imagenesPrincipales?.[0]?.url || '/placeholder.jpg'}
-                    alt={product.nombre}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                {product.nuevo && (
-                    <span className="absolute top-4 left-4 bg-primary text-secondary px-3 py-1 text-xs uppercase tracking-wide">
-                        Nuevo
-                    </span>
-                )}
-                {product.descuento?.activo && (
-                    <span className="absolute top-4 right-4 bg-red-600 text-secondary px-3 py-1 text-xs uppercase tracking-wide">
-                        -{product.descuento.porcentaje}%
-                    </span>
-                )}
-            </div>
-            <div>
-                <p className="text-xs text-accent uppercase tracking-wide mb-1">
-                    {product.categoria?.nombre || 'Sin categoría'}
-                </p>
-                <h3 className="font-medium mb-2">{product.nombre}</h3>
-                <div className="flex items-center gap-2">
-                    {product.descuento?.activo ? (
-                        <>
-                            <span className="text-accent line-through">S/ {product.precio.toFixed(2)}</span>
-                            <span className="font-bold">
-                                S/ {(product.precio * (1 - product.descuento.porcentaje / 100)).toFixed(2)}
-                            </span>
-                        </>
-                    ) : (
-                        <span className="font-bold">S/ {product.precio.toFixed(2)}</span>
+            <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+                <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
+                    <Image
+                        src={product.imagenesPrincipales?.[0]?.url || '/placeholder.jpg'}
+                        alt={product.nombre}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    {product.nuevo && (
+                        <span className="absolute top-3 left-3 bg-black text-white px-2.5 py-1 text-xs font-medium rounded shadow-sm">
+                            NUEVO
+                        </span>
                     )}
+                    {product.descuento?.activo && (
+                        <span className="absolute top-3 right-3 bg-red-600 text-white px-2.5 py-1 text-xs font-bold rounded shadow-sm">
+                            -{product.descuento.porcentaje}%
+                        </span>
+                    )}
+
+                    {/* Quick Actions Overlay */}
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100">
+                        <button
+                            onClick={handleQuickAdd}
+                            disabled={isAdding}
+                            className="bg-white text-gray-900 px-4 py-2 rounded-lg font-medium shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center gap-2 hover:bg-gray-900 hover:text-white disabled:opacity-75"
+                        >
+                            <FiShoppingCart size={16} />
+                            {isAdding ? '¡Agregado!' : 'Agregar'}
+                        </button>
+                    </div>
+                </div>
+
+                <div className="p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+                        {product.categoria?.nombre || 'Sin categoría'}
+                    </p>
+                    <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-gray-700 transition-colors">
+                        {product.nombre}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                        {discountedPrice ? (
+                            <>
+                                <span className="text-lg font-bold text-gray-900">
+                                    S/ {discountedPrice.toFixed(2)}
+                                </span>
+                                <span className="text-sm text-gray-500 line-through">
+                                    S/ {product.precio.toFixed(2)}
+                                </span>
+                            </>
+                        ) : (
+                            <span className="text-lg font-bold text-gray-900">
+                                S/ {product.precio.toFixed(2)}
+                            </span>
+                        )}
+                    </div>
                 </div>
             </div>
         </Link>
