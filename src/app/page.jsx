@@ -320,7 +320,7 @@ export default function HomePage() {
         <div className="container-custom">
           <div className="text-center mb-12">
             <span className="text-sm uppercase tracking-wider text-gray-600 font-medium">Síguenos</span>
-            <h2 className="text-4xl md:text-5xl font-bold mt-2 mb-4">@KrazeStore</h2>
+            <h2 className="text-4xl md:text-5xl font-bold mt-2 mb-4">@KrazePerú</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Etiquétanos en tus fotos para aparecer aquí
             </p>
@@ -359,7 +359,7 @@ export default function HomePage() {
 
           <div className="text-center mt-8">
             <a
-              href="https://instagram.com"
+              href="https://www.instagram.com/kraze_peru/"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-gray-900 hover:text-gray-600 transition-colors font-medium"

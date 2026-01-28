@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import ProductCard from '../../components/products/ProductCard'
 import ProductFilters from '../../components/products/ProductFilters'
@@ -9,12 +9,12 @@ import axios from 'axios'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
 
-export default function ProductsPage() {
+function ProductsContent() {
     const searchParams = useSearchParams()
     const [products, setProducts] = useState([])
     const [categories, setCategories] = useState([])
     const [loading, setLoading] = useState(true)
-    const [viewMode, setViewMode] = useState('grid') // 'grid' or 'list'
+    const [viewMode, setViewMode] = useState('grid')
     const [showMobileFilters, setShowMobileFilters] = useState(false)
     const [filters, setFilters] = useState({
         genero: searchParams.get('genero') || '',
@@ -27,7 +27,6 @@ export default function ProductsPage() {
         ordenar: 'reciente',
     })
 
-    // Obtener el rango de precios disponibles
     const [priceRange, setPriceRange] = useState({ min: 0, max: 500 })
 
     useEffect(() => {
@@ -36,7 +35,6 @@ export default function ProductsPage() {
     }, [filters])
 
     useEffect(() => {
-        // Calcular rango de precios de los productos
         if (products.length > 0) {
             const prices = products.map(p => p.precio)
             const min = Math.floor(Math.min(...prices))
@@ -104,7 +102,6 @@ export default function ProductsPage() {
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="container-custom py-8">
-                {/* Header */}
                 <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                         <div>
@@ -118,7 +115,6 @@ export default function ProductsPage() {
                             <p className="text-gray-600">{products.length} {products.length === 1 ? 'producto' : 'productos'}</p>
                         </div>
 
-                        {/* View Mode Toggle - Desktop */}
                         <div className="hidden sm:flex items-center gap-2 bg-gray-100 rounded-lg p-1">
                             <button
                                 onClick={() => setViewMode('grid')}
@@ -143,9 +139,7 @@ export default function ProductsPage() {
                         </div>
                     </div>
 
-                    {/* Filters Bar */}
                     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                        {/* Mobile Filter Button */}
                         <button
                             onClick={() => setShowMobileFilters(true)}
                             className="lg:hidden flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:border-gray-400 transition-colors"
@@ -159,7 +153,6 @@ export default function ProductsPage() {
                             )}
                         </button>
 
-                        {/* Sort Dropdown */}
                         <div className="flex items-center gap-3 w-full sm:w-auto">
                             <label className="text-sm text-gray-600 whitespace-nowrap">Ordenar por:</label>
                             <select
@@ -176,7 +169,6 @@ export default function ProductsPage() {
                         </div>
                     </div>
 
-                    {/* Active Filters Tags */}
                     {activeFiltersCount > 0 && (
                         <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200">
                             {filters.genero && (
@@ -223,7 +215,6 @@ export default function ProductsPage() {
                 </div>
 
                 <div className="flex gap-8">
-                    {/* Desktop Filters Sidebar */}
                     <aside className="hidden lg:block w-72 flex-shrink-0">
                         <div className="sticky top-4">
                             <ProductFilters
@@ -236,7 +227,6 @@ export default function ProductsPage() {
                         </div>
                     </aside>
 
-                    {/* Products Grid/List */}
                     <div className="flex-1">
                         {loading ? (
                             <div className="flex items-center justify-center py-20">
@@ -280,7 +270,6 @@ export default function ProductsPage() {
                 </div>
             </div>
 
-            {/* Mobile Filters Modal */}
             {showMobileFilters && (
                 <div className="fixed inset-0 z-50 lg:hidden">
                     <div
@@ -319,18 +308,33 @@ export default function ProductsPage() {
             )}
 
             <style jsx>{`
-                @keyframes slide-in-right {
-                    from {
-                        transform: translateX(100%);
-                    }
-                    to {
-                        transform: translateX(0);
-                    }
-                }
-                .animate-slide-in-right {
-                    animation: slide-in-right 0.3s ease-out;
-                }
-            `}</style>
+        @keyframes slide-in-right {
+          from {
+            transform: translateX(100%);
+          }
+          to {
+            transform: translateX(0);
+          }
+        }
+        .animate-slide-in-right {
+          animation: slide-in-right 0.3s ease-out;
+        }
+      `}</style>
         </div>
+    )
+}
+
+export default function ProductsPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-gray-900 border-r-transparent mb-4"></div>
+                    <p className="text-gray-600">Cargando...</p>
+                </div>
+            </div>
+        }>
+            <ProductsContent />
+        </Suspense>
     )
 }
