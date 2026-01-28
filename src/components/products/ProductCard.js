@@ -2,50 +2,12 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { FiHeart, FiShoppingCart } from 'react-icons/fi'
-import { useCart } from '../../context/CartContext'
-import { useState } from 'react'
 
 export default function ProductCard({ product, viewMode = 'grid' }) {
-    const { addToCart } = useCart()
-    const [isAdding, setIsAdding] = useState(false)
 
     const discountedPrice = product.descuento?.activo
         ? product.precio * (1 - product.descuento.porcentaje / 100)
         : null
-
-    const handleQuickAdd = async (e) => {
-        e.preventDefault()
-
-        // Verificar que el producto tenga variantes disponibles
-        if (!product.variantes || product.variantes.length === 0) {
-            alert('Este producto no tiene variantes disponibles')
-            return
-        }
-
-        // Buscar la primera variante con stock disponible
-        const availableVariant = product.variantes.find(v => v.stock > 0)
-
-        if (!availableVariant) {
-            alert('Este producto no tiene stock disponible')
-            return
-        }
-
-        setIsAdding(true)
-
-        try {
-            // Agregar al carrito con la primera variante disponible
-            addToCart(product, availableVariant, 1)
-
-            // Pequeña animación de feedback
-            setTimeout(() => {
-                setIsAdding(false)
-            }, 300)
-        } catch (error) {
-            console.error('Error al agregar al carrito:', error)
-            setIsAdding(false)
-        }
-    }
 
     if (viewMode === 'list') {
         return (
@@ -105,27 +67,6 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
                                         </span>
                                     )}
                                 </div>
-
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={handleQuickAdd}
-                                        className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 text-sm font-medium disabled:opacity-50"
-                                        disabled={isAdding}
-                                    >
-                                        <FiShoppingCart size={16} />
-                                        {isAdding ? 'Agregado!' : 'Agregar'}
-                                    </button>
-                                    <button
-                                        onClick={(e) => {
-                                            e.preventDefault()
-                                            // Add to wishlist logic
-                                        }}
-                                        className="p-2 border border-gray-300 rounded-full hover:border-gray-900 hover:bg-gray-50 transition-colors"
-                                        aria-label="Agregar a favoritos"
-                                    >
-                                        <FiHeart size={18} />
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -136,7 +77,7 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
 
     // Grid View (default)
     return (
-        <Link href={`/producto/${product.slug || product._id}`} className="group">
+        <Link href={`/producto/${product.slug}`} className="group">
             <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
                 <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
                     <Image
@@ -155,18 +96,6 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
                             -{product.descuento.porcentaje}%
                         </span>
                     )}
-
-                    {/* Quick Actions Overlay */}
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100">
-                        <button
-                            onClick={handleQuickAdd}
-                            disabled={isAdding}
-                            className="bg-white text-gray-900 px-4 py-2 rounded-lg font-medium shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center gap-2 hover:bg-gray-900 hover:text-white disabled:opacity-75"
-                        >
-                            <FiShoppingCart size={16} />
-                            {isAdding ? '¡Agregado!' : 'Agregar'}
-                        </button>
-                    </div>
                 </div>
 
                 <div className="p-4">
