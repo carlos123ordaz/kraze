@@ -4,7 +4,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 
 export default function ProductCard({ product, viewMode = 'grid' }) {
-
     const discountedPrice = product.descuento?.activo
         ? product.precio * (1 - product.descuento.porcentaje / 100)
         : null
@@ -12,35 +11,29 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
     if (viewMode === 'list') {
         return (
             <Link href={`/producto/${product.slug}`} className="group">
-                <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-                    <div className="flex flex-col sm:flex-row gap-4 p-4">
+                <div className="bg-white overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                    <div className="flex flex-col sm:flex-row gap-4">
                         {/* Image */}
-                        <div className="relative w-full sm:w-48 aspect-[3/4] sm:aspect-square overflow-hidden rounded-lg bg-gray-100 flex-shrink-0">
+                        <div className="relative w-full sm:w-48 aspect-square overflow-hidden bg-gray-100 flex-shrink-0">
                             <Image
                                 src={product.imagenesPrincipales?.[0]?.url || '/placeholder.jpg'}
                                 alt={product.nombre}
                                 fill
                                 className="object-cover group-hover:scale-105 transition-transform duration-500"
                             />
-                            {product.nuevo && (
-                                <span className="absolute top-3 left-3 bg-black text-white px-2 py-1 text-xs font-medium rounded">
-                                    NUEVO
-                                </span>
-                            )}
                             {product.descuento?.activo && (
-                                <span className="absolute top-3 right-3 bg-red-600 text-white px-2 py-1 text-xs font-bold rounded">
-                                    -{product.descuento.porcentaje}%
-                                </span>
+                                <div className="absolute top-3 left-3">
+                                    <span className="bg-red-600 text-white px-3 py-1.5 text-xs font-bold rounded">
+                                        Oferta
+                                    </span>
+                                </div>
                             )}
                         </div>
 
                         {/* Content */}
-                        <div className="flex-1 flex flex-col justify-between">
+                        <div className="flex-1 flex flex-col justify-between py-2">
                             <div>
-                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
-                                    {product.categoria?.nombre || 'Sin categoría'}
-                                </p>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-gray-700 transition-colors">
+                                <h3 className="text-base font-medium text-gray-900 mb-2 group-hover:text-gray-700 transition-colors">
                                     {product.nombre}
                                 </h3>
                                 {product.descripcion && (
@@ -50,23 +43,21 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
                                 )}
                             </div>
 
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    {discountedPrice ? (
-                                        <>
-                                            <span className="text-lg font-bold text-gray-900">
-                                                S/ {discountedPrice.toFixed(2)}
-                                            </span>
-                                            <span className="text-sm text-gray-500 line-through">
-                                                S/ {product.precio.toFixed(2)}
-                                            </span>
-                                        </>
-                                    ) : (
-                                        <span className="text-lg font-bold text-gray-900">
-                                            S/ {product.precio.toFixed(2)}
+                            <div className="flex items-center gap-2">
+                                {discountedPrice ? (
+                                    <>
+                                        <span className="text-sm text-gray-400 line-through">
+                                            S/ {product.precio.toFixed(2)} PEN
                                         </span>
-                                    )}
-                                </div>
+                                        <span className="text-base font-bold text-gray-900">
+                                            S/ {discountedPrice.toFixed(2)} PEN
+                                        </span>
+                                    </>
+                                ) : (
+                                    <span className="text-base font-bold text-gray-900">
+                                        S/ {product.precio.toFixed(2)} PEN
+                                    </span>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -75,49 +66,50 @@ export default function ProductCard({ product, viewMode = 'grid' }) {
         )
     }
 
-    // Grid View (default)
+    // Grid View - Estilo Savage exacto
     return (
-        <Link href={`/producto/${product.slug}`} className="group">
-            <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
-                <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
+        <Link href={`/producto/${product.slug}`} className="group block">
+            <div className="bg-white overflow-hidden">
+                {/* Image Container */}
+                <div className="relative aspect-square overflow-hidden bg-gray-100 mb-3">
                     <Image
                         src={product.imagenesPrincipales?.[0]?.url || '/placeholder.jpg'}
                         alt={product.nombre}
                         fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="object-cover group-hover:scale-105 transition-transform duration-700"
                     />
-                    {product.nuevo && (
-                        <span className="absolute top-3 left-3 bg-black text-white px-2.5 py-1 text-xs font-medium rounded shadow-sm">
-                            NUEVO
-                        </span>
-                    )}
+
+                    {/* Badge de Oferta - Estilo Savage exacto */}
                     {product.descuento?.activo && (
-                        <span className="absolute top-3 right-3 bg-red-600 text-white px-2.5 py-1 text-xs font-bold rounded shadow-sm">
-                            -{product.descuento.porcentaje}%
-                        </span>
+                        <div className="absolute top-3 left-3">
+                            <span className="bg-red-600 text-white px-3 py-1.5 text-xs font-bold rounded shadow-sm">
+                                Oferta
+                            </span>
+                        </div>
                     )}
                 </div>
 
-                <div className="p-4">
-                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
-                        {product.categoria?.nombre || 'Sin categoría'}
-                    </p>
-                    <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-gray-700 transition-colors">
+                {/* Product Info */}
+                <div>
+                    {/* Nombre del producto */}
+                    <h3 className="text-sm md:text-base font-medium text-gray-900 mb-2 line-clamp-2 group-hover:text-gray-700 transition-colors">
                         {product.nombre}
                     </h3>
-                    <div className="flex items-center gap-2">
+
+                    {/* Precios - Estilo Savage */}
+                    <div className="flex items-center gap-2 flex-wrap">
                         {discountedPrice ? (
                             <>
-                                <span className="text-lg font-bold text-gray-900">
-                                    S/ {discountedPrice.toFixed(2)}
+                                <span className="text-sm text-gray-400 line-through">
+                                    S/ {product.precio.toFixed(2)} PEN
                                 </span>
-                                <span className="text-sm text-gray-500 line-through">
-                                    S/ {product.precio.toFixed(2)}
+                                <span className="text-base font-bold text-gray-900">
+                                    S/ {discountedPrice.toFixed(2)} PEN
                                 </span>
                             </>
                         ) : (
-                            <span className="text-lg font-bold text-gray-900">
-                                S/ {product.precio.toFixed(2)}
+                            <span className="text-base font-bold text-gray-900">
+                                S/ {product.precio.toFixed(2)} PEN
                             </span>
                         )}
                     </div>

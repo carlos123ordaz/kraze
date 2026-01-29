@@ -7,120 +7,111 @@ import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
 import SearchModal from '../common/SearchModal'
 import SideCart from '../cart/SideCart'
+import Image from 'next/image'
 
 export default function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [searchOpen, setSearchOpen] = useState(false)
-    const [scrolled, setScrolled] = useState(false)
+    const [visible, setVisible] = useState(true)
+    const [lastScrollY, setLastScrollY] = useState(0)
     const { getCartCount, isSideCartOpen, openSideCart, closeSideCart } = useCart()
     const { user } = useAuth()
 
     useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 20)
+        const controlHeader = () => {
+            const currentScrollY = window.scrollY
+
+            if (currentScrollY < 10) {
+                // Siempre mostrar el header en la parte superior
+                setVisible(true)
+            } else if (currentScrollY > lastScrollY) {
+                // Scrolling hacia abajo - ocultar header
+                setVisible(false)
+                setMobileMenuOpen(false) // Cerrar menú móvil al hacer scroll
+            } else {
+                // Scrolling hacia arriba - mostrar header
+                setVisible(true)
+            }
+
+            setLastScrollY(currentScrollY)
         }
-        window.addEventListener('scroll', handleScroll)
-        return () => window.removeEventListener('scroll', handleScroll)
-    }, [])
+
+        window.addEventListener('scroll', controlHeader)
+
+        return () => {
+            window.removeEventListener('scroll', controlHeader)
+        }
+    }, [lastScrollY])
 
     const navigation = [
-        { name: 'Nuevo', href: '/productos?nuevo=true' },
-        { name: 'Hombre', href: '/productos?genero=hombre' },
-        { name: 'Mujer', href: '/productos?genero=mujer' },
-        { name: 'Colecciones', href: '/colecciones' },
-        { name: 'Ofertas', href: '/ofertas' },
+        { name: 'Inicio', href: '/' },
+        { name: 'Catálogo', href: '/productos' },
+        { name: 'Packs', href: '/packs' },
+        { name: 'Contacto', href: '/contacto' },
     ]
 
     return (
         <>
-            {/* Announcement Bar */}
-            <div className="bg-black text-white text-center py-2.5 text-sm font-medium">
-                <p className="animate-pulse-slow">
-                    ✨ Envío gratis en compras mayores a S/ 150 | Código: ENVIOGRATIS
-                </p>
-            </div>
-
-            {/* Main Header */}
-            <header
-                className={`bg-white border-b sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'border-gray-300 shadow-md' : 'border-gray-200'
-                    }`}
-            >
-                <nav className="container-custom">
-                    <div className="flex items-center justify-between h-16 lg:h-20">
-                        {/* Mobile menu button */}
-                        <button
-                            className="lg:hidden p-2 -ml-2 hover:bg-gray-100 rounded-lg transition-colors"
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            aria-label="Menú"
-                        >
-                            {mobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-                        </button>
-
-                        {/* Desktop Navigation - Left */}
-                        <div className="hidden lg:flex items-center space-x-8">
-                            {navigation.slice(0, 2).map((item) => (
-                                <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    className="text-sm font-medium text-gray-700 hover:text-black transition-colors uppercase tracking-wider relative group"
-                                >
-                                    {item.name}
-                                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all group-hover:w-full"></span>
-                                </Link>
-                            ))}
-                        </div>
-
-                        {/* Logo */}
-                        <Link
-                            href="/"
-                            className="text-2xl lg:text-3xl font-bold tracking-[0.2em] hover:tracking-[0.25em] transition-all"
-                        >
-                            KRAZE
-                        </Link>
-
-                        {/* Desktop Navigation - Right */}
-                        <div className="hidden lg:flex items-center space-x-8">
-                            {navigation.slice(2).map((item) => (
-                                <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    className="text-sm font-medium text-gray-700 hover:text-black transition-colors uppercase tracking-wider relative group"
-                                >
-                                    {item.name}
-                                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all group-hover:w-full"></span>
-                                </Link>
-                            ))}
-                        </div>
-
-                        {/* Icons */}
-                        <div className="flex items-center space-x-4 lg:space-x-6">
+            {/* Main Header - Fondo Negro estilo Savage */}
+            <header className={`bg-black text-white sticky top-0 z-50 transition-transform duration-300 ${visible ? 'translate-y-0' : '-translate-y-full'
+                }`}>
+                <div className="container-custom">
+                    <div className="flex items-center justify-between py-6 lg:py-8">
+                        {/* Left Icons */}
+                        <div className="flex items-center gap-4">
                             <button
                                 onClick={() => setSearchOpen(true)}
-                                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                                className="p-2 hover:bg-gray-800 rounded-full transition-colors"
                                 aria-label="Buscar"
                             >
-                                <FiSearch size={20} />
+                                <FiSearch size={22} className="text-white" />
                             </button>
 
+                            {/* Mobile menu button */}
+                            <button
+                                className="lg:hidden p-2 hover:bg-gray-800 rounded-full transition-colors"
+                                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                aria-label="Menú"
+                            >
+                                {mobileMenuOpen ? <FiX size={22} /> : <FiMenu size={22} />}
+                            </button>
+                        </div>
+
+                        {/* Logo Central - Estilo Savage */}
+                        <Link href="/" className="flex-shrink-0">
+                            <div className="text-center">
+                                <Image
+                                    src="https://storage.googleapis.com/quotizador/productos/Captura%20de%20pantalla%202026-01-28%20220250.png"
+                                    alt="Kraze"
+                                    width={200}
+                                    height={80}
+                                    className="h-14 md:h-20 w-auto"
+                                    priority
+                                />
+                            </div>
+                        </Link>
+
+                        {/* Right Icons */}
+                        <div className="flex items-center gap-4">
                             <Link
                                 href={user ? "/mi-cuenta" : "/login"}
-                                className="p-2 hover:bg-gray-100 rounded-full transition-colors relative group"
+                                className="p-2 hover:bg-gray-800 rounded-full transition-colors relative"
                                 aria-label={user ? "Mi cuenta" : "Iniciar sesión"}
                             >
-                                <FiUser size={20} />
+                                <FiUser size={22} className="text-white" />
                                 {user && (
-                                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border-2 border-white"></span>
+                                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border-2 border-black"></span>
                                 )}
                             </Link>
 
                             <button
                                 onClick={openSideCart}
-                                className="p-2 hover:bg-gray-100 rounded-full transition-colors relative"
+                                className="p-2 hover:bg-gray-800 rounded-full transition-colors relative"
                                 aria-label="Carrito de compras"
                             >
-                                <FiShoppingBag size={20} />
+                                <FiShoppingBag size={22} className="text-white" />
                                 {getCartCount() > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-black text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-semibold animate-scale-in">
+                                    <span className="absolute -top-1 -right-1 bg-white text-black text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
                                         {getCartCount()}
                                     </span>
                                 )}
@@ -128,15 +119,31 @@ export default function Header() {
                         </div>
                     </div>
 
+                    {/* Navigation Menu - Desktop */}
+                    <nav className="hidden lg:block border-t border-gray-800">
+                        <ul className="flex items-center justify-center gap-12 py-4">
+                            {navigation.map((item) => (
+                                <li key={item.name}>
+                                    <Link
+                                        href={item.href}
+                                        className="text-sm text-white hover:text-gray-300 transition-colors font-medium uppercase tracking-wide"
+                                    >
+                                        {item.name}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
+
                     {/* Mobile Menu */}
                     {mobileMenuOpen && (
-                        <div className="lg:hidden py-6 border-t border-gray-200 animate-slide-down">
+                        <div className="lg:hidden py-6 border-t border-gray-800 animate-slide-down">
                             <div className="flex flex-col space-y-4">
                                 {navigation.map((item) => (
                                     <Link
                                         key={item.name}
                                         href={item.href}
-                                        className="text-base font-medium text-gray-700 hover:text-black transition-colors uppercase tracking-wider px-4 py-2 hover:bg-gray-50 rounded-lg"
+                                        className="text-base font-medium text-white hover:text-gray-300 transition-colors uppercase tracking-wide px-4 py-2 hover:bg-gray-800 rounded-lg"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
                                         {item.name}
@@ -145,17 +152,17 @@ export default function Header() {
 
                                 {user && (
                                     <>
-                                        <hr className="border-gray-200" />
+                                        <hr className="border-gray-800" />
                                         <Link
                                             href="/mi-cuenta"
-                                            className="text-base font-medium text-gray-700 hover:text-black transition-colors px-4 py-2 hover:bg-gray-50 rounded-lg"
+                                            className="text-base font-medium text-white hover:text-gray-300 transition-colors px-4 py-2 hover:bg-gray-800 rounded-lg"
                                             onClick={() => setMobileMenuOpen(false)}
                                         >
                                             Mi Cuenta
                                         </Link>
                                         <Link
                                             href="/mis-pedidos"
-                                            className="text-base font-medium text-gray-700 hover:text-black transition-colors px-4 py-2 hover:bg-gray-50 rounded-lg"
+                                            className="text-base font-medium text-white hover:text-gray-300 transition-colors px-4 py-2 hover:bg-gray-800 rounded-lg"
                                             onClick={() => setMobileMenuOpen(false)}
                                         >
                                             Mis Pedidos
@@ -165,7 +172,7 @@ export default function Header() {
                             </div>
                         </div>
                     )}
-                </nav>
+                </div>
             </header>
 
             {/* Search Modal */}
@@ -175,14 +182,6 @@ export default function Header() {
             <SideCart isOpen={isSideCartOpen} onClose={closeSideCart} />
 
             <style jsx>{`
-                @keyframes scale-in {
-                    from {
-                        transform: scale(0);
-                    }
-                    to {
-                        transform: scale(1);
-                    }
-                }
                 @keyframes slide-down {
                     from {
                         opacity: 0;
@@ -193,22 +192,8 @@ export default function Header() {
                         transform: translateY(0);
                     }
                 }
-                .animate-scale-in {
-                    animation: scale-in 0.2s ease-out;
-                }
                 .animate-slide-down {
                     animation: slide-down 0.3s ease-out;
-                }
-                @keyframes pulse-slow {
-                    0%, 100% {
-                        opacity: 1;
-                    }
-                    50% {
-                        opacity: 0.8;
-                    }
-                }
-                .animate-pulse-slow {
-                    animation: pulse-slow 3s ease-in-out infinite;
                 }
             `}</style>
         </>

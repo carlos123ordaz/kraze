@@ -10,6 +10,7 @@ import ProductGallery from '../../../components/products/ProductGallery'
 import ProductInfo from '../../../components/products/ProductInfo'
 import ProductReviews from '../../../components/products/ProductReviews'
 import { API_URL } from '@/app/config'
+import Footer from '@/components/layout/Footer'
 
 export default function ProductPage() {
     const params = useParams()
@@ -261,6 +262,7 @@ export default function ProductPage() {
                     <ProductReviews productId={product._id} />
                 </div>
             </div>
+            <Footer />
         </div>
     )
 }
