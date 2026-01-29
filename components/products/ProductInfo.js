@@ -1,16 +1,19 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { FiHeart, FiCheck, FiX, FiTruck, FiRefreshCw, FiShoppingCart } from 'react-icons/fi'
+import { FiCheck, FiX, FiTruck, FiRefreshCw, FiShoppingCart, FiZap } from 'react-icons/fi'
 import { useCart } from '../../context/CartContext'
+import { useRouter } from 'next/navigation'
 
 export default function ProductInfo({ product }) {
-    const { addToCart } = useCart()
+    const { addToCart, addToCartSilent } = useCart()
+    const router = useRouter()
     const [selectedSize, setSelectedSize] = useState('')
     const [selectedColor, setSelectedColor] = useState('')
     const [quantity, setQuantity] = useState(1)
     const [notification, setNotification] = useState(null)
     const [isAddingToCart, setIsAddingToCart] = useState(false)
+    const [isBuyingNow, setIsBuyingNow] = useState(false)
 
     // Obtener tallas únicas
     const sizes = [...new Set(product.variantes?.map(v => v.talla) || [])]
@@ -43,6 +46,35 @@ export default function ProductInfo({ product }) {
     const showNotification = (message, type = 'success') => {
         setNotification({ message, type })
         setTimeout(() => setNotification(null), 3500)
+    }
+
+    const handleBuyNow = async () => {
+        if (!selectedSize || !selectedColor) {
+            showNotification('Por favor selecciona talla y color', 'error')
+            return
+        }
+
+        const variant = product.variantes?.find(
+            v => v.talla === selectedSize && v.color.codigoHex === selectedColor
+        )
+
+        if (!variant || variant.stock === 0) {
+            showNotification('Esta variante no está disponible en stock', 'error')
+            return
+        }
+
+        if (quantity > variant.stock) {
+            showNotification(`Solo hay ${variant.stock} unidades disponibles`, 'error')
+            return
+        }
+
+        setIsBuyingNow(true)
+
+        // Agregar al carrito SIN abrir el sidebar y redirigir al checkout
+
+        addToCartSilent(product, variant, quantity) // ← Usar addToCartSilent
+        router.push('/checkout')
+
     }
 
     const handleAddToCart = async () => {
@@ -89,8 +121,8 @@ export default function ProductInfo({ product }) {
             {notification && (
                 <div className="fixed top-4 right-4 z-50 animate-slide-in">
                     <div className={`flex items-start gap-3 p-4 rounded-lg shadow-lg max-w-md ${notification.type === 'success'
-                            ? 'bg-green-50 border border-green-200'
-                            : 'bg-red-50 border border-red-200'
+                        ? 'bg-green-50 border border-green-200'
+                        : 'bg-red-50 border border-red-200'
                         }`}>
                         <div className={`flex-shrink-0 ${notification.type === 'success' ? 'text-green-600' : 'text-red-600'
                             }`}>
@@ -178,10 +210,10 @@ export default function ProductInfo({ product }) {
                                     onClick={() => setSelectedSize(size)}
                                     disabled={!isAvailable}
                                     className={`min-w-[60px] px-5 py-3 border-2 text-sm font-semibold rounded-lg transition-all ${selectedSize === size
-                                            ? 'border-black bg-black text-white'
-                                            : isAvailable
-                                                ? 'border-gray-300 hover:border-black hover:bg-gray-50'
-                                                : 'border-gray-200 text-gray-400 cursor-not-allowed opacity-50 line-through'
+                                        ? 'border-black bg-black text-white'
+                                        : isAvailable
+                                            ? 'border-gray-300 hover:border-black hover:bg-gray-50'
+                                            : 'border-gray-200 text-gray-400 cursor-not-allowed opacity-50 line-through'
                                         }`}
                                 >
                                     {size}
@@ -211,8 +243,8 @@ export default function ProductInfo({ product }) {
                                     onClick={() => setSelectedColor(color.codigoHex)}
                                     disabled={!isAvailable}
                                     className={`w-14 h-14 rounded-full border-3 transition-all relative ${selectedColor === color.codigoHex
-                                            ? 'border-black ring-2 ring-black ring-offset-2 scale-110'
-                                            : 'border-gray-300 hover:scale-105'
+                                        ? 'border-black ring-2 ring-black ring-offset-2 scale-110'
+                                        : 'border-gray-300 hover:scale-105'
                                         } ${!isAvailable ? 'opacity-40 cursor-not-allowed' : ''}`}
                                     style={{ backgroundColor: color.codigoHex }}
                                     title={color.nombre}
@@ -222,9 +254,9 @@ export default function ProductInfo({ product }) {
                                             <FiCheck
                                                 size={20}
                                                 className={`${color.codigoHex.toLowerCase() === '#ffffff' ||
-                                                        color.codigoHex.toLowerCase() === '#fff'
-                                                        ? 'text-black'
-                                                        : 'text-white'
+                                                    color.codigoHex.toLowerCase() === '#fff'
+                                                    ? 'text-black'
+                                                    : 'text-white'
                                                     }`}
                                             />
                                         </div>
@@ -297,30 +329,46 @@ export default function ProductInfo({ product }) {
                 </div>
             </div>
 
-            {/* Add to Cart */}
+            {/* Buttons - Comprar Ahora + Agregar al Carrito */}
             <div className="space-y-3 mb-8">
+                {/* Botón Comprar Ahora - Principal */}
                 <button
-                    onClick={handleAddToCart}
-                    disabled={!currentVariant || currentVariant.stock === 0 || isAddingToCart}
-                    className="w-full py-4 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
+                    onClick={handleBuyNow}
+                    disabled={!currentVariant || currentVariant.stock === 0 || isBuyingNow}
+                    className="w-full py-4 bg-black text-white rounded-lg font-bold hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg shadow-lg hover:shadow-xl"
                 >
-                    {isAddingToCart ? (
+                    {isBuyingNow ? (
                         <>
                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            Agregando...
+                            Procesando...
                         </>
                     ) : currentVariant && currentVariant.stock > 0 ? (
                         <>
-                            <FiShoppingCart size={20} />
-                            Agregar al Carrito
+                            <FiZap size={20} />
+                            Comprar Ahora
                         </>
                     ) : (
                         'Sin Stock'
                     )}
                 </button>
-                <button className="w-full py-4 border-2 border-black text-black rounded-lg font-semibold hover:bg-black hover:text-white transition-colors flex items-center justify-center gap-2">
-                    <FiHeart size={20} />
-                    Agregar a Favoritos
+
+                {/* Botón Agregar al Carrito - Secundario */}
+                <button
+                    onClick={handleAddToCart}
+                    disabled={!currentVariant || currentVariant.stock === 0 || isAddingToCart}
+                    className="w-full py-4 border-2 border-black text-black rounded-lg font-semibold hover:bg-black hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                    {isAddingToCart ? (
+                        <>
+                            <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                            Agregando...
+                        </>
+                    ) : (
+                        <>
+                            <FiShoppingCart size={20} />
+                            Agregar al Carrito
+                        </>
+                    )}
                 </button>
             </div>
 

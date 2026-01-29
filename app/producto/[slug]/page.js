@@ -89,7 +89,7 @@ export default function ProductPage() {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Breadcrumb */}
-            <div className="bg-white border-b border-gray-200">
+            <div className="bg-white border-b border-gray-200 product-page-content">
                 <div className="container-custom py-4">
                     <nav className="flex items-center gap-2 text-sm">
                         <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
@@ -117,7 +117,7 @@ export default function ProductPage() {
             </div>
 
             {/* Product Details */}
-            <div className="container-custom py-8">
+            <div className="container-custom py-8 product-page-content">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
                     <div className="lg:sticky lg:top-24 self-start">
                         <ProductGallery images={product.imagenesPrincipales} />

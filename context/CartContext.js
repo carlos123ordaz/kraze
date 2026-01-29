@@ -21,6 +21,7 @@ export function CartProvider({ children }) {
         localStorage.setItem('cart', JSON.stringify(cart))
     }, [cart])
 
+    // Función normal: agrega al carrito Y abre el sidebar
     const addToCart = (product, variant, quantity = 1) => {
         setCart((prevCart) => {
             const existingItem = prevCart.find(
@@ -45,6 +46,33 @@ export function CartProvider({ children }) {
 
         // Abrir el carrito lateral cuando se agrega un producto
         setIsSideCartOpen(true)
+    }
+
+    // Función silenciosa: agrega al carrito SIN abrir el sidebar
+    // Útil para "Comprar Ahora" donde se redirige directo al checkout
+    const addToCartSilent = (product, variant, quantity = 1) => {
+        setCart((prevCart) => {
+            const existingItem = prevCart.find(
+                (item) =>
+                    item.product._id === product._id &&
+                    item.variant.talla === variant.talla &&
+                    item.variant.color.codigoHex === variant.color.codigoHex
+            )
+
+            if (existingItem) {
+                return prevCart.map((item) =>
+                    item.product._id === product._id &&
+                        item.variant.talla === variant.talla &&
+                        item.variant.color.codigoHex === variant.color.codigoHex
+                        ? { ...item, quantity: item.quantity + quantity }
+                        : item
+                )
+            }
+
+            return [...prevCart, { product, variant, quantity }]
+        })
+
+        // NO abrir el carrito lateral
     }
 
     const openSideCart = () => setIsSideCartOpen(true)
@@ -95,6 +123,7 @@ export function CartProvider({ children }) {
             value={{
                 cart,
                 addToCart,
+                addToCartSilent, // Nueva función
                 removeFromCart,
                 updateQuantity,
                 clearCart,
