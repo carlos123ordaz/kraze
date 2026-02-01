@@ -248,7 +248,9 @@ export default function CheckoutPage() {
             {/* Header */}
             <div className="border-b">
                 <div className="max-w-6xl mx-auto px-4 py-4">
-                    <h1 className="text-2xl font-bold text-gray-900 tracking-wide">KRAZE</h1>
+                    <Link href="/" className="text-2xl font-bold text-gray-900 tracking-wide">
+                        KRAZE
+                    </Link>
                 </div>
             </div>
 
