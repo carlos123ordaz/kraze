@@ -8,6 +8,7 @@ import { FiCheck, FiX, FiShoppingBag, FiChevronDown, FiChevronUp } from 'react-i
 import axios from 'axios'
 import Image from 'next/image'
 import { API_URL } from '../config'
+import Link from 'next/link'
 
 export default function CheckoutPage() {
     const router = useRouter()
