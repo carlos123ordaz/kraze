@@ -117,38 +117,6 @@ export default function ProductInfo({ product }) {
 
     return (
         <div className="relative bg-white rounded-2xl p-8 shadow-sm">
-            {/* Notification Toast */}
-            {notification && (
-                <div className="fixed top-4 right-4 z-50 animate-slide-in">
-                    <div className={`flex items-start gap-3 p-4 rounded-lg shadow-lg max-w-md ${notification.type === 'success'
-                        ? 'bg-green-50 border border-green-200'
-                        : 'bg-red-50 border border-red-200'
-                        }`}>
-                        <div className={`flex-shrink-0 ${notification.type === 'success' ? 'text-green-600' : 'text-red-600'
-                            }`}>
-                            {notification.type === 'success' ? <FiCheck size={24} /> : <FiX size={24} />}
-                        </div>
-                        <div className="flex-1">
-                            <p className={`font-medium ${notification.type === 'success' ? 'text-green-900' : 'text-red-900'
-                                }`}>
-                                {notification.type === 'success' ? '¡Éxito!' : 'Error'}
-                            </p>
-                            <p className={`text-sm mt-1 ${notification.type === 'success' ? 'text-green-700' : 'text-red-700'
-                                }`}>
-                                {notification.message}
-                            </p>
-                        </div>
-                        <button
-                            onClick={() => setNotification(null)}
-                            className={`flex-shrink-0 ${notification.type === 'success' ? 'text-green-600' : 'text-red-600'
-                                } hover:opacity-70`}
-                        >
-                            <FiX size={20} />
-                        </button>
-                    </div>
-                </div>
-            )}
-
             {/* Category & Stock Badge */}
             <div className="flex items-center justify-between mb-3">
                 <span className="text-sm text-gray-600 uppercase tracking-wider font-medium">

@@ -18,7 +18,7 @@ export default function LoginPage() {
     // Redirigir si ya está logeado
     useEffect(() => {
         if (!authLoading && user) {
-            router.push('/mi-cuenta')
+            router.push('/account/orders')
         }
     }, [user, authLoading, router])
 
@@ -36,7 +36,7 @@ export default function LoginPage() {
 
         try {
             await login(formData.email, formData.password)
-            router.push('/mi-cuenta')
+            router.push('/account/orders')
         } catch (error) {
             setError(error.response?.data?.mensaje || 'Error al iniciar sesión')
         } finally {

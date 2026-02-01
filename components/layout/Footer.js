@@ -65,7 +65,7 @@ export default function Footer() {
                                 <FiFacebook size={18} />
                             </a>
                             <a
-                                href="https://instagram.com"
+                                href="https://www.instagram.com/kraze_peru/"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-10 h-10 bg-gray-800 hover:bg-white hover:text-black rounded-full flex items-center justify-center transition-all"
@@ -165,7 +165,7 @@ export default function Footer() {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/mi-cuenta" className="text-gray-400 hover:text-white transition-colors flex items-center gap-2 group">
+                                <Link href="/account/orders" className="text-gray-400 hover:text-white transition-colors flex items-center gap-2 group">
                                     <span className="w-1 h-1 bg-gray-600 rounded-full group-hover:bg-white transition-colors"></span>
                                     Mi Cuenta
                                 </Link>

@@ -4,12 +4,10 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
-import { FiCheck, FiX, FiShoppingBag, FiTruck, FiCreditCard } from 'react-icons/fi'
+import { FiCheck, FiX, FiShoppingBag, FiChevronDown, FiChevronUp } from 'react-icons/fi'
 import axios from 'axios'
 import Image from 'next/image'
 import { API_URL } from '../config'
-
-
 
 export default function CheckoutPage() {
     const router = useRouter()
@@ -17,6 +15,7 @@ export default function CheckoutPage() {
     const { user } = useAuth()
     const [loading, setLoading] = useState(false)
     const [notification, setNotification] = useState(null)
+    const [showOrderSummary, setShowOrderSummary] = useState(false)
     const [formData, setFormData] = useState({
         nombres: '',
         apellidos: '',
@@ -25,11 +24,11 @@ export default function CheckoutPage() {
         dni: '',
         direccion: '',
         referencia: '',
-        distrito: '',
-        provincia: '',
-        departamento: '',
-        metodoPago: 'yape',
-        notasCliente: '',
+        ciudad: '',
+        region: '',
+        codigoPostal: '',
+        metodoPago: 'mercado_pago',
+        metodoEnvio: 'lima',
     })
 
     // Autocompletar datos del usuario logeado
@@ -50,9 +49,8 @@ export default function CheckoutPage() {
                     if (dirDefault) {
                         newData.direccion = dirDefault.direccion || prev.direccion
                         newData.referencia = dirDefault.referencia || prev.referencia
-                        newData.distrito = dirDefault.distrito || prev.distrito
-                        newData.provincia = dirDefault.provincia || prev.provincia
-                        newData.departamento = dirDefault.departamento || prev.departamento
+                        newData.ciudad = dirDefault.distrito || prev.ciudad
+                        newData.region = dirDefault.departamento || prev.region
                     }
                 }
 
@@ -82,23 +80,7 @@ export default function CheckoutPage() {
             showNotification('Los apellidos son requeridos', 'error')
             return false
         }
-        if (!formData.email.trim()) {
-            showNotification('El email es requerido', 'error')
-            return false
-        }
-        if (!formData.telefono.trim()) {
-            showNotification('El teléfono es requerido', 'error')
-            return false
-        }
-        if (formData.telefono.length !== 9 || !formData.telefono.startsWith('9')) {
-            showNotification('El teléfono debe tener 9 dígitos y comenzar con 9', 'error')
-            return false
-        }
-        if (!formData.dni.trim()) {
-            showNotification('El DNI es requerido', 'error')
-            return false
-        }
-        if (formData.dni.length !== 8) {
+        if (!formData.dni.trim() || formData.dni.length !== 8) {
             showNotification('El DNI debe tener 8 dígitos', 'error')
             return false
         }
@@ -106,16 +88,12 @@ export default function CheckoutPage() {
             showNotification('La dirección es requerida', 'error')
             return false
         }
-        if (!formData.distrito.trim()) {
-            showNotification('El distrito es requerido', 'error')
+        if (!formData.ciudad.trim()) {
+            showNotification('La ciudad es requerida', 'error')
             return false
         }
-        if (!formData.provincia.trim()) {
-            showNotification('La provincia es requerida', 'error')
-            return false
-        }
-        if (!formData.departamento.trim()) {
-            showNotification('El departamento es requerido', 'error')
+        if (!formData.telefono.trim() || formData.telefono.length !== 9) {
+            showNotification('El teléfono debe tener 9 dígitos', 'error')
             return false
         }
         return true
@@ -159,7 +137,7 @@ export default function CheckoutPage() {
             })
 
             const subtotal = items.reduce((sum, item) => sum + item.precioTotal, 0)
-            const costoEnvio = subtotal >= 150 ? 0 : 10
+            const costoEnvio = formData.metodoEnvio === 'lima' ? 10 : 15
             const total = subtotal + costoEnvio
 
             const orderData = {
@@ -173,9 +151,9 @@ export default function CheckoutPage() {
                 direccionEnvio: {
                     direccion: formData.direccion.trim(),
                     referencia: formData.referencia.trim(),
-                    distrito: formData.distrito.trim(),
-                    provincia: formData.provincia.trim(),
-                    departamento: formData.departamento.trim()
+                    distrito: formData.ciudad.trim(),
+                    provincia: formData.ciudad.trim(),
+                    departamento: formData.region.trim()
                 },
                 items: items,
                 montos: {
@@ -188,11 +166,10 @@ export default function CheckoutPage() {
                     tipo: formData.metodoPago
                 },
                 envio: {
-                    zona: formData.departamento.toLowerCase() === 'lima' ? 'lima' : 'provincia',
+                    zona: formData.metodoEnvio,
                     costo: costoEnvio,
-                    tiempoEstimado: formData.departamento.toLowerCase() === 'lima' ? '2-3 días' : '3-5 días'
+                    tiempoEstimado: formData.metodoEnvio === 'lima' ? '2-3 días' : '3-5 días'
                 },
-                notasCliente: formData.notasCliente.trim(),
                 usarCarrito: false
             }
 
@@ -211,7 +188,7 @@ export default function CheckoutPage() {
     }
 
     const subtotal = getCartTotal()
-    const envio = subtotal >= 150 ? 0 : 10
+    const envio = formData.metodoEnvio === 'lima' ? 10 : 15
     const total = subtotal + envio
 
     if (cart.length === 0) {
@@ -235,7 +212,7 @@ export default function CheckoutPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-white flex flex-col">
             {/* Notification Toast */}
             {notification && (
                 <div className="fixed top-4 right-4 z-50 animate-slide-in">
@@ -268,225 +245,291 @@ export default function CheckoutPage() {
                 </div>
             )}
 
-            <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-semibold text-gray-900">Finalizar Compra</h1>
-                    <p className="text-gray-600 mt-2">Completa tus datos para procesar tu pedido</p>
+            {/* Header */}
+            <div className="border-b">
+                <div className="max-w-6xl mx-auto px-4 py-4">
+                    <h1 className="text-2xl font-bold text-gray-900 tracking-wide">KRAZE</h1>
                 </div>
+            </div>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Formulario */}
-                        <div className="lg:col-span-2 space-y-6">
-                            {/* Contacto */}
-                            <div className="bg-white rounded-lg shadow-sm p-6">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="bg-black text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium">
-                                        1
+            {/* Mobile Order Summary Toggle */}
+            <button
+                type="button"
+                onClick={() => setShowOrderSummary(!showOrderSummary)}
+                className="lg:hidden w-full bg-gray-50 border-b border-gray-200 px-4 py-4 flex items-center justify-between"
+            >
+                <div className="flex items-center gap-2">
+                    {showOrderSummary ? <FiChevronUp size={20} /> : <FiChevronDown size={20} />}
+                    <span className="text-sm font-medium text-blue-600">
+                        {showOrderSummary ? 'Ocultar' : 'Mostrar'} resumen del pedido
+                    </span>
+                </div>
+                <span className="text-base font-semibold">
+                    <span className="text-xs font-normal text-gray-600 mr-1">PEN</span>
+                    S/ {total.toFixed(2)}
+                </span>
+            </button>
+
+            {/* Mobile Order Summary Content */}
+            {showOrderSummary && (
+                <div className="lg:hidden bg-gray-50 border-b border-gray-200 px-4 py-6">
+                    <div className="max-w-md mx-auto space-y-4">
+                        {cart.map((item, index) => {
+                            const precio = item.product.descuento?.activo
+                                ? item.product.precio * (1 - item.product.descuento.porcentaje / 100)
+                                : item.product.precio
+
+                            return (
+                                <div key={index} className="flex gap-4">
+                                    <div className="relative flex-shrink-0">
+                                        <div className="w-16 h-16 bg-gray-100 rounded border border-gray-200 overflow-hidden">
+                                            {item.product.imagenesPrincipales?.[0]?.url && (
+                                                <img
+                                                    src={item.product.imagenesPrincipales[0].url}
+                                                    alt={item.product.nombre}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            )}
+                                        </div>
+                                        <span className="absolute -top-2 -right-2 bg-gray-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-medium">
+                                            {item.quantity}
+                                        </span>
                                     </div>
-                                    <h2 className="text-xl font-semibold text-gray-900">Contacto</h2>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm text-gray-900 truncate">
+                                            {item.product.nombre}
+                                        </p>
+                                        <p className="text-xs text-gray-600 mt-0.5">
+                                            {item.variant.talla}
+                                        </p>
+                                    </div>
+                                    <div className="text-sm font-medium text-gray-900">
+                                        S/ {(precio * item.quantity).toFixed(2)}
+                                    </div>
+                                </div>
+                            )
+                        })}
+
+                        <div className="border-t border-gray-200 pt-4 space-y-3">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-gray-700">Subtotal</span>
+                                <span className="text-gray-900">S/ {subtotal.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-gray-700">Envío</span>
+                                <span className="text-gray-900">S/ {envio.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-base font-semibold pt-3 border-t border-gray-200">
+                                <span className="text-gray-900">Total</span>
+                                <span className="text-gray-900">
+                                    <span className="text-xs font-normal text-gray-600 mr-1">PEN</span>
+                                    S/ {total.toFixed(2)}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="flex-1 flex flex-col lg:flex-row">
+                <form onSubmit={handleSubmit} className="w-full flex flex-col lg:flex-row">
+                    {/* Formulario - Lado Izquierdo con fondo blanco */}
+                    <div className="w-full lg:w-1/2 bg-white px-4 py-8 flex justify-center lg:justify-end order-2 lg:order-1">
+                        <div className="w-full max-w-xl space-y-6">
+                            {/* Contacto */}
+                            <div>
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-lg font-semibold text-gray-900">Contacto</h2>
+                                    {
+                                        !user && (
+                                            <button type="button" onClick={() => router.push('/login')} className="text-sm text-blue-600 hover:underline">
+                                                Iniciar sesión
+                                            </button>
+                                        )
+                                    }
                                 </div>
 
+                                <input
+                                    type="email"
+                                    name="email"
+                                    placeholder="Email o número de teléfono móvil"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full px-3 py-3 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                                />
+
+                                <label className="flex items-center gap-2 mt-3">
+                                    <input
+                                        type="checkbox"
+                                        className="w-4 h-4 border-gray-300 rounded text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <span className="text-sm text-gray-700">
+                                        Enviarme novedades y ofertas por correo electrónico
+                                    </span>
+                                </label>
+                            </div>
+
+                            {/* Entrega */}
+                            <div>
+                                <h2 className="text-lg font-semibold text-gray-900 mb-6">Entrega</h2>
+
                                 <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-xs text-gray-700 mb-1">País / Región</label>
+                                        <select
+                                            className="w-full px-3 py-3 border border-gray-300 rounded text-sm bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                            disabled
+                                        >
+                                            <option>Perú</option>
+                                        </select>
+                                    </div>
+
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Nombre
-                                            </label>
                                             <input
                                                 type="text"
                                                 name="nombres"
-                                                placeholder="Tu nombre"
+                                                placeholder="Nombre"
                                                 value={formData.nombres}
                                                 onChange={handleChange}
                                                 required
-                                                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                                                className="w-full px-3 py-3 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Apellidos
-                                            </label>
                                             <input
                                                 type="text"
                                                 name="apellidos"
-                                                placeholder="Tus apellidos"
+                                                placeholder="Apellidos"
                                                 value={formData.apellidos}
                                                 onChange={handleChange}
                                                 required
-                                                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Email
-                                            </label>
-                                            <input
-                                                type="email"
-                                                name="email"
-                                                placeholder="tu@email.com"
-                                                value={formData.email}
-                                                onChange={handleChange}
-                                                required
-                                                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Teléfono
-                                            </label>
-                                            <input
-                                                type="tel"
-                                                name="telefono"
-                                                placeholder="9XXXXXXXX"
-                                                value={formData.telefono}
-                                                onChange={handleChange}
-                                                required
-                                                maxLength="9"
-                                                pattern="9[0-9]{8}"
-                                                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                                                className="w-full px-3 py-3 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                                             />
                                         </div>
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            DNI
-                                        </label>
                                         <input
                                             type="text"
                                             name="dni"
-                                            placeholder="12345678"
+                                            placeholder="DNI"
                                             value={formData.dni}
                                             onChange={handleChange}
                                             required
                                             maxLength="8"
                                             pattern="[0-9]{8}"
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Entrega */}
-                            <div className="bg-white rounded-lg shadow-sm p-6">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="bg-black text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium">
-                                        2
-                                    </div>
-                                    <h2 className="text-xl font-semibold text-gray-900">Entrega</h2>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                País / Región
-                                            </label>
-                                            <select
-                                                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all bg-white"
-                                                disabled
-                                            >
-                                                <option>Perú</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Departamento
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="departamento"
-                                                placeholder="Lima"
-                                                value={formData.departamento}
-                                                onChange={handleChange}
-                                                required
-                                                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Provincia
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="provincia"
-                                                placeholder="Lima"
-                                                value={formData.provincia}
-                                                onChange={handleChange}
-                                                required
-                                                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Distrito
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="distrito"
-                                            placeholder="Ej: San Isidro"
-                                            value={formData.distrito}
-                                            onChange={handleChange}
-                                            required
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                                            className="w-full px-3 py-3 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Dirección
-                                        </label>
                                         <input
                                             type="text"
                                             name="direccion"
-                                            placeholder="Calle, número, urbanización"
+                                            placeholder="Dirección"
                                             value={formData.direccion}
                                             onChange={handleChange}
                                             required
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                                            className="w-full px-3 py-3 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                                         />
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Referencia (opcional)
-                                        </label>
                                         <input
                                             type="text"
                                             name="referencia"
-                                            placeholder="Casa azul, al costado del parque"
+                                            placeholder="Casa, apartamento, etc. (opcional)"
                                             value={formData.referencia}
                                             onChange={handleChange}
-                                            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                                            className="w-full px-3 py-3 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                                         />
                                     </div>
 
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        <div>
+                                            <input
+                                                type="text"
+                                                name="ciudad"
+                                                placeholder="Ciudad"
+                                                value={formData.ciudad}
+                                                onChange={handleChange}
+                                                required
+                                                className="w-full px-3 py-3 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <select
+                                                name="region"
+                                                value={formData.region}
+                                                onChange={handleChange}
+                                                required
+                                                className="w-full px-3 py-3 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                                            >
+                                                <option value="">Región</option>
+                                                <option value="Amazonas">Amazonas</option>
+                                                <option value="Áncash">Áncash</option>
+                                                <option value="Apurímac">Apurímac</option>
+                                                <option value="Arequipa">Arequipa</option>
+                                                <option value="Ayacucho">Ayacucho</option>
+                                                <option value="Cajamarca">Cajamarca</option>
+                                                <option value="Callao">Callao</option>
+                                                <option value="Cusco">Cusco</option>
+                                                <option value="Huancavelica">Huancavelica</option>
+                                                <option value="Huánuco">Huánuco</option>
+                                                <option value="Ica">Ica</option>
+                                                <option value="Junín">Junín</option>
+                                                <option value="La Libertad">La Libertad</option>
+                                                <option value="Lambayeque">Lambayeque</option>
+                                                <option value="Lima (Metropolitana)">Lima (Metropolitana)</option>
+                                                <option value="Lima (Provincias)">Lima (Provincias)</option>
+                                                <option value="Loreto">Loreto</option>
+                                                <option value="Madre de Dios">Madre de Dios</option>
+                                                <option value="Moquegua">Moquegua</option>
+                                                <option value="Pasco">Pasco</option>
+                                                <option value="Piura">Piura</option>
+                                                <option value="Puno">Puno</option>
+                                                <option value="San Martín">San Martín</option>
+                                                <option value="Tacna">Tacna</option>
+                                                <option value="Tumbes">Tumbes</option>
+                                                <option value="Ucayali">Ucayali</option>
+                                            </select>
+
+                                        </div>
+                                        <div>
+                                            <input
+                                                type="text"
+                                                name="codigoPostal"
+                                                placeholder="Código postal (opc.)"
+                                                value={formData.codigoPostal}
+                                                onChange={handleChange}
+                                                className="w-full px-3 py-3 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                    </div>
+
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Teléfono
-                                        </label>
                                         <input
                                             type="tel"
                                             name="telefono"
+                                            placeholder="Teléfono"
                                             value={formData.telefono}
-                                            disabled
-                                            className="w-full px-4 py-3 border border-gray-200 rounded-md bg-gray-50 text-gray-600"
+                                            onChange={handleChange}
+                                            required
+                                            maxLength="9"
+                                            pattern="9[0-9]{8}"
+                                            className="w-full px-3 py-3 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                                         />
                                         <p className="text-xs text-gray-500 mt-1">
                                             En caso de que sea necesario llamar para concretar la entrega
                                         </p>
                                     </div>
 
-                                    <label className="flex items-start gap-3 cursor-pointer">
+                                    <label className="flex items-start gap-2">
                                         <input
                                             type="checkbox"
-                                            className="mt-1 w-4 h-4 border-gray-300 rounded focus:ring-2 focus:ring-black"
+                                            className="w-4 h-4 mt-0.5 border-gray-300 rounded text-blue-600 focus:ring-blue-500"
                                         />
                                         <span className="text-sm text-gray-700">
                                             Guardar mi información y consultar más rápidamente la próxima vez
@@ -495,111 +538,137 @@ export default function CheckoutPage() {
                                 </div>
                             </div>
 
-                            {/* Métodos de Envío */}
-                            <div className="bg-white rounded-lg shadow-sm p-6">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <FiTruck size={24} className="text-gray-700" />
-                                    <h2 className="text-xl font-semibold text-gray-900">Métodos de envío</h2>
-                                </div>
+                            {/* Métodos de envío */}
+                            <div>
+                                <h2 className="text-lg font-semibold text-gray-900 mb-4">Métodos de envío</h2>
 
                                 <div className="space-y-3">
-                                    <label className="flex items-center justify-between p-4 border-2 border-black bg-blue-50 rounded-md cursor-pointer">
+                                    <label className={`flex items-center justify-between p-4 border-2 rounded cursor-pointer transition-all ${formData.metodoEnvio === 'lima'
+                                        ? 'border-blue-600 bg-blue-50'
+                                        : 'border-gray-300 hover:border-gray-400'
+                                        }`}>
                                         <div className="flex items-center gap-3">
                                             <input
                                                 type="radio"
                                                 name="metodoEnvio"
-                                                defaultChecked
-                                                className="w-4 h-4 text-black focus:ring-black"
+                                                value="lima"
+                                                checked={formData.metodoEnvio === 'lima'}
+                                                onChange={handleChange}
+                                                className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                                             />
-                                            <span className="font-medium text-gray-900">
-                                                {formData.departamento.toLowerCase() === 'lima' ? 'LIMA' : 'PROVINCIA'}
-                                            </span>
+                                            <span className="text-sm font-medium text-gray-900">LIMA</span>
                                         </div>
-                                        <span className="font-semibold text-gray-900">
-                                            {envio === 0 ? 'GRATIS' : `S/ ${envio.toFixed(2)}`}
-                                        </span>
+                                        <span className="text-sm font-semibold text-gray-900">S/ 10.00</span>
+                                    </label>
+
+                                    <label className={`flex items-center justify-between p-4 border-2 rounded cursor-pointer transition-all ${formData.metodoEnvio === 'provincia'
+                                        ? 'border-blue-600 bg-blue-50'
+                                        : 'border-gray-300 hover:border-gray-400'
+                                        }`}>
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                type="radio"
+                                                name="metodoEnvio"
+                                                value="provincia"
+                                                checked={formData.metodoEnvio === 'provincia'}
+                                                onChange={handleChange}
+                                                className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                                            />
+                                            <span className="text-sm font-medium text-gray-900">PROVINCIA</span>
+                                        </div>
+                                        <span className="text-sm font-semibold text-gray-900">S/ 15.00</span>
                                     </label>
                                 </div>
                             </div>
 
                             {/* Pago */}
-                            <div className="bg-white rounded-lg shadow-sm p-6">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="bg-black text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium">
-                                        3
-                                    </div>
-                                    <h2 className="text-xl font-semibold text-gray-900">Pago</h2>
-                                </div>
-
-                                <p className="text-sm text-gray-600 mb-4">
+                            <div>
+                                <h2 className="text-lg font-semibold text-gray-900 mb-2">Pago</h2>
+                                <p className="text-xs text-gray-600 mb-4">
                                     Todas las transacciones son seguras y están encriptadas.
                                 </p>
 
                                 <div className="space-y-3">
-                                    <label className={`block p-4 border-2 rounded-md cursor-pointer transition-all ${formData.metodoPago === 'mercado_pago'
-                                        ? 'border-black bg-blue-50'
+                                    <label className={`block border-2 rounded cursor-pointer transition-all ${formData.metodoPago === 'mercado_pago'
+                                        ? 'border-blue-600'
                                         : 'border-gray-300 hover:border-gray-400'
                                         }`}>
-                                        <div className="flex items-center justify-between">
+                                        <div className={`p-4 ${formData.metodoPago === 'mercado_pago' ? 'bg-blue-50' : ''}`}>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="radio"
+                                                        name="metodoPago"
+                                                        value="mercado_pago"
+                                                        checked={formData.metodoPago === 'mercado_pago'}
+                                                        onChange={handleChange}
+                                                        className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                                                    />
+                                                    <span className="text-sm font-medium text-gray-900">Mercado Pago</span>
+                                                </div>
+                                                <div className="flex gap-1">
+                                                    <span className="text-xs bg-yellow-400 text-black px-2 py-1 rounded font-bold">MP</span>
+                                                    <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded">VISA</span>
+                                                    <span className="text-xs bg-red-500 text-white px-2 py-1 rounded">MC</span>
+                                                    <span className="text-xs bg-gray-700 text-white px-2 py-1 rounded">+2</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {formData.metodoPago === 'mercado_pago' && (
+                                            <div className="p-4 bg-gray-50 border-t border-gray-300">
+                                                <p className="text-xs text-gray-600">
+                                                    Se te redirigirá a Mercado Pago para que completes la compra.
+                                                </p>
+                                            </div>
+                                        )}
+                                    </label>
+
+                                    <label className={`flex items-center p-4 border-2 rounded cursor-pointer transition-all ${formData.metodoPago === 'transferencia'
+                                        ? 'border-blue-600 bg-blue-50'
+                                        : 'border-gray-300 hover:border-gray-400'
+                                        }`}>
+                                        <input
+                                            type="radio"
+                                            name="metodoPago"
+                                            value="transferencia"
+                                            checked={formData.metodoPago === 'transferencia'}
+                                            onChange={handleChange}
+                                            className="w-4 h-4 text-blue-600 focus:ring-blue-500 mr-3"
+                                        />
+                                        <span className="text-sm font-medium text-gray-900">Depósito Bancario</span>
+                                    </label>
+
+                                    <label className={`block border-2 rounded cursor-pointer transition-all ${formData.metodoPago === 'yape'
+                                        ? 'border-blue-600'
+                                        : 'border-gray-300 hover:border-gray-400'
+                                        }`}>
+                                        <div className={`p-4 ${formData.metodoPago === 'contra_entrega' ? 'bg-blue-50' : ''}`}>
                                             <div className="flex items-center gap-3">
                                                 <input
                                                     type="radio"
                                                     name="metodoPago"
-                                                    value="mercado_pago"
-                                                    checked={formData.metodoPago === 'mercado_pago'}
+                                                    value="yape"
+                                                    checked={formData.metodoPago === 'yape'}
                                                     onChange={handleChange}
-                                                    className="w-4 h-4 text-black focus:ring-black"
+                                                    className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                                                 />
-                                                <span className="font-medium text-gray-900">Mercado Pago</span>
-                                            </div>
-                                            <div className="flex gap-1">
-                                                <span className="text-xs bg-yellow-400 text-black px-2 py-1 rounded font-bold">MP</span>
-                                                <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded">VISA</span>
-                                                <span className="text-xs bg-red-500 text-white px-2 py-1 rounded">MC</span>
-                                                <span className="text-xs bg-gray-700 text-white px-2 py-1 rounded">+2</span>
+                                                <span className="text-sm font-medium text-gray-900">Yape</span>
                                             </div>
                                         </div>
+                                        {formData.metodoPago === 'yape' && (
+                                            <div className="p-4 bg-gray-50 border-t border-gray-300">
+                                                <p className="text-xs text-gray-600">
+                                                    <span>Yape/Plin: 938717041 </span> <br />
+                                                    <span>JeanCarlos Sot*</span>
+                                                </p>
+                                            </div>
+                                        )}
                                     </label>
-
-                                    <label className={`block p-4 border-2 rounded-md cursor-pointer transition-all ${formData.metodoPago === 'transferencia'
-                                        ? 'border-black bg-blue-50'
+                                    <label className={`block border-2 rounded cursor-pointer transition-all ${formData.metodoPago === 'contra_entrega'
+                                        ? 'border-blue-600'
                                         : 'border-gray-300 hover:border-gray-400'
                                         }`}>
-                                        <div className="flex items-center gap-3">
-                                            <input
-                                                type="radio"
-                                                name="metodoPago"
-                                                value="transferencia"
-                                                checked={formData.metodoPago === 'transferencia'}
-                                                onChange={handleChange}
-                                                className="w-4 h-4 text-black focus:ring-black"
-                                            />
-                                            <span className="font-medium text-gray-900">Depósito Bancario</span>
-                                        </div>
-                                    </label>
-
-                                    <label className={`block p-4 border-2 rounded-md cursor-pointer transition-all ${formData.metodoPago === 'yape'
-                                        ? 'border-black bg-blue-50'
-                                        : 'border-gray-300 hover:border-gray-400'
-                                        }`}>
-                                        <div className="flex items-center gap-3">
-                                            <input
-                                                type="radio"
-                                                name="metodoPago"
-                                                value="yape"
-                                                checked={formData.metodoPago === 'yape'}
-                                                onChange={handleChange}
-                                                className="w-4 h-4 text-black focus:ring-black"
-                                            />
-                                            <span className="font-medium text-gray-900">YAPE</span>
-                                        </div>
-                                    </label>
-
-                                    <label className={`block border-2 rounded-md cursor-pointer transition-all ${formData.metodoPago === 'contra_entrega'
-                                        ? 'border-black bg-blue-50'
-                                        : 'border-gray-300 hover:border-gray-400'
-                                        }`}>
-                                        <div className="p-4">
+                                        <div className={`p-4 ${formData.metodoPago === 'contra_entrega' ? 'bg-blue-50' : ''}`}>
                                             <div className="flex items-center gap-3">
                                                 <input
                                                     type="radio"
@@ -607,15 +676,15 @@ export default function CheckoutPage() {
                                                     value="contra_entrega"
                                                     checked={formData.metodoPago === 'contra_entrega'}
                                                     onChange={handleChange}
-                                                    className="w-4 h-4 text-black focus:ring-black"
+                                                    className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                                                 />
-                                                <span className="font-medium text-gray-900">Separar con 10 Soles</span>
+                                                <span className="text-sm font-medium text-gray-900">Contra entrega</span>
                                             </div>
                                         </div>
                                         {formData.metodoPago === 'contra_entrega' && (
-                                            <div className="px-4 pb-4 pt-2 border-t border-gray-200 bg-gray-50">
-                                                <p className="text-sm text-gray-700">
-                                                    Podrás reservar tus prendas y culminar el pago en un plazo no mayor a 48h como Max
+                                            <div className="p-4 bg-gray-50 border-t border-gray-300">
+                                                <p className="text-xs text-gray-600">
+                                                    Paga tu pedido al momento de recibirlo. Compra con total confianza y seguridad: solo pagas cuando el producto llegue a tus manos.
                                                 </p>
                                             </div>
                                         )}
@@ -623,144 +692,111 @@ export default function CheckoutPage() {
                                 </div>
                             </div>
 
-                            {/* Dirección de Facturación */}
-                            <div className="bg-white rounded-lg shadow-sm p-6">
-                                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                                    Dirección de facturación
-                                </h2>
+                            {/* Dirección de facturación */}
+                            <div>
+                                <h2 className="text-lg font-semibold text-gray-900 mb-4">Dirección de facturación</h2>
 
                                 <div className="space-y-3">
-                                    <label className="flex items-center gap-3 p-4 border-2 border-black bg-blue-50 rounded-md cursor-pointer">
+                                    <label className="flex items-center p-4 border-2 border-blue-600 bg-blue-50 rounded cursor-pointer">
                                         <input
                                             type="radio"
                                             name="direccionFacturacion"
                                             defaultChecked
-                                            className="w-4 h-4 text-black focus:ring-black"
+                                            className="w-4 h-4 text-blue-600 focus:ring-blue-500 mr-3"
                                         />
-                                        <span className="text-gray-900">La misma dirección de envío</span>
+                                        <span className="text-sm text-gray-900">La misma dirección de envío</span>
                                     </label>
 
-                                    <label className="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-md cursor-pointer hover:border-gray-400">
+                                    <label className="flex items-center p-4 border-2 border-gray-300 rounded cursor-pointer hover:border-gray-400">
                                         <input
                                             type="radio"
                                             name="direccionFacturacion"
-                                            className="w-4 h-4 text-black focus:ring-black"
+                                            className="w-4 h-4 text-blue-600 focus:ring-blue-500 mr-3"
                                         />
-                                        <span className="text-gray-900">Usar una dirección de facturación distinta</span>
+                                        <span className="text-sm text-gray-900">Usar una dirección de facturación distinta</span>
                                     </label>
                                 </div>
                             </div>
+
+                            {/* Botón Pagar ahora */}
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 rounded text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            >
+                                {loading ? (
+                                    <>
+                                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                        Procesando...
+                                    </>
+                                ) : (
+                                    'Pagar ahora'
+                                )}
+                            </button>
                         </div>
+                    </div>
 
-                        {/* Resumen del Pedido - Sidebar */}
-                        <div className="lg:col-span-1">
-                            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
-                                <h2 className="text-lg font-semibold text-gray-900 mb-6">Resumen del pedido</h2>
+                    {/* Resumen del Pedido - Lado Derecho con fondo gris (Hidden on mobile) */}
+                    <div className="hidden lg:flex w-full lg:w-1/2 bg-gray-50 px-4 py-8 border-l border-gray-200 justify-start order-1 lg:order-2">
+                        <div className="w-full max-w-md">
+                            {/* Items del carrito */}
+                            <div className="space-y-4 mb-6">
+                                {cart.map((item, index) => {
+                                    const precio = item.product.descuento?.activo
+                                        ? item.product.precio * (1 - item.product.descuento.porcentaje / 100)
+                                        : item.product.precio
 
-                                {/* Items del carrito */}
-                                <div className="space-y-4 mb-6">
-                                    {cart.map((item, index) => {
-                                        const precio = item.product.descuento?.activo
-                                            ? item.product.precio * (1 - item.product.descuento.porcentaje / 100)
-                                            : item.product.precio
-
-                                        return (
-                                            <div key={index} className="flex gap-4">
-                                                <div className="relative flex-shrink-0">
-                                                    <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden">
-                                                        {item.product.imagenesPrincipales?.[0]?.url && (
-                                                            <img
-                                                                src={item.product.imagenesPrincipales[0].url}
-                                                                alt={item.product.nombre}
-                                                                className="w-full h-full object-cover"
-                                                            />
-                                                        )}
-                                                    </div>
-                                                    <span className="absolute -top-2 -right-2 bg-gray-700 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-medium">
-                                                        {item.quantity}
-                                                    </span>
+                                    return (
+                                        <div key={index} className="flex gap-4">
+                                            <div className="relative flex-shrink-0">
+                                                <div className="w-16 h-16 bg-gray-100 rounded border border-gray-200 overflow-hidden">
+                                                    {item.product.imagenesPrincipales?.[0]?.url && (
+                                                        <img
+                                                            src={item.product.imagenesPrincipales[0].url}
+                                                            alt={item.product.nombre}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    )}
                                                 </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-gray-900 truncate">
-                                                        {item.product.nombre}
-                                                    </p>
-                                                    <p className="text-xs text-gray-600 mt-1">
-                                                        Talla: {item.variant.talla} | {item.variant.color.nombre}
-                                                    </p>
-                                                    <p className="text-sm font-semibold text-gray-900 mt-1">
-                                                        S/ {(precio * item.quantity).toFixed(2)}
-                                                    </p>
-                                                </div>
+                                                <span className="absolute -top-2 -right-2 bg-gray-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-medium">
+                                                    {item.quantity}
+                                                </span>
                                             </div>
-                                        )
-                                    })}
-                                </div>
-
-                                {/* Totales */}
-                                <div className="space-y-3 pt-4 border-t border-gray-200">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-600">Subtotal</span>
-                                        <span className="font-medium text-gray-900">S/ {subtotal.toFixed(2)}</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-600">Envío</span>
-                                        <span className="font-medium text-gray-900">
-                                            {envio === 0 ? (
-                                                <span className="text-green-600">GRATIS</span>
-                                            ) : (
-                                                `S/ ${envio.toFixed(2)}`
-                                            )}
-                                        </span>
-                                    </div>
-
-                                    {envio === 0 && (
-                                        <div className="bg-green-50 border border-green-200 rounded-md p-3">
-                                            <p className="text-xs text-green-700 flex items-center gap-2">
-                                                <FiCheck className="flex-shrink-0" />
-                                                Envío gratis por compra mayor a S/ 150
-                                            </p>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm text-gray-900 truncate">
+                                                    {item.product.nombre}
+                                                </p>
+                                                <p className="text-xs text-gray-600 mt-0.5">
+                                                    {item.variant.talla}
+                                                </p>
+                                            </div>
+                                            <div className="text-sm font-medium text-gray-900">
+                                                S/ {(precio * item.quantity).toFixed(2)}
+                                            </div>
                                         </div>
-                                    )}
+                                    )
+                                })}
+                            </div>
 
-                                    {envio > 0 && subtotal < 150 && (
-                                        <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-                                            <p className="text-xs text-blue-700">
-                                                Agrega S/ {(150 - subtotal).toFixed(2)} más para envío gratis
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    <div className="flex justify-between text-base font-semibold text-gray-900 pt-3 border-t border-gray-200">
-                                        <span>Total</span>
-                                        <span className="flex items-baseline gap-1">
-                                            <span className="text-xs font-normal text-gray-600">PEN</span>
-                                            S/ {total.toFixed(2)}
-                                        </span>
-                                    </div>
+                            <div className="border-t border-gray-200 pt-4 space-y-3">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-700">Subtotal</span>
+                                    <span className="text-gray-900">S/ {subtotal.toFixed(2)}</span>
                                 </div>
-
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                >
-                                    {loading ? (
-                                        <>
-                                            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                            </svg>
-                                            Procesando...
-                                        </>
-                                    ) : (
-                                        'Finalizar el pedido'
-                                    )}
-                                </button>
-
-                                <p className="text-xs text-center text-gray-500 mt-4">
-                                    Al confirmar tu pedido, aceptas nuestros{' '}
-                                    <a href="#" className="underline hover:text-gray-700">términos y condiciones</a>
-                                </p>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-700">Envío</span>
+                                    <span className="text-gray-900">S/ {envio.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between text-base font-semibold pt-3 border-t border-gray-200">
+                                    <span className="text-gray-900">Total</span>
+                                    <span className="text-gray-900">
+                                        <span className="text-xs font-normal text-gray-600 mr-1">PEN</span>
+                                        S/ {total.toFixed(2)}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>

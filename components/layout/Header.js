@@ -46,7 +46,7 @@ export default function Header() {
     const navigation = [
         { name: 'Inicio', href: '/' },
         { name: 'Catálogo', href: '/productos' },
-        { name: 'Packs', href: '/packs' },
+        // { name: 'Packs', href: '/packs' },
         { name: 'Contacto', href: '/contacto' },
     ]
 
@@ -94,7 +94,7 @@ export default function Header() {
                         {/* Right Icons */}
                         <div className="flex items-center gap-4">
                             <Link
-                                href={user ? "/mi-cuenta" : "/login"}
+                                href={user ? "/account/orders" : "/login"}
                                 className="p-2 hover:bg-gray-800 rounded-full transition-colors relative"
                                 aria-label={user ? "Mi cuenta" : "Iniciar sesión"}
                             >
@@ -154,7 +154,7 @@ export default function Header() {
                                     <>
                                         <hr className="border-gray-800" />
                                         <Link
-                                            href="/mi-cuenta"
+                                            href="/account/orders"
                                             className="text-base font-medium text-white hover:text-gray-300 transition-colors px-4 py-2 hover:bg-gray-800 rounded-lg"
                                             onClick={() => setMobileMenuOpen(false)}
                                         >

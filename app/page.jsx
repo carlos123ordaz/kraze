@@ -9,6 +9,7 @@ import { FiShield, FiTruck, FiCreditCard, FiHeadphones } from 'react-icons/fi'
 import axios from 'axios'
 import Image from 'next/image'
 import { API_URL } from './config'
+import Header from '@/components/layout/Header'
 
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState([])
@@ -59,6 +60,7 @@ export default function HomePage() {
 
   return (
     <>
+      <Header />
       <Hero />
 
       {/* Banner Promocional */}
@@ -142,8 +144,6 @@ export default function HomePage() {
       )}
 
 
-
-      {/* Social Media Section */}
       <section className="bg-black text-white py-16">
         <div className="container-custom text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">SOCIAL MEDIA</h2>

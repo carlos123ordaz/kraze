@@ -16,7 +16,7 @@ export default function RootLayout({ children }) {
       <body>
         <AuthProvider>
           <CartProvider>
-            <Header />
+
             <main className="min-h-screen">
               {children}
               <WhatsAppButton
@@ -24,7 +24,6 @@ export default function RootLayout({ children }) {
                 message="Hola, tengo una consulta sobre los productos"
               />
             </main>
-
           </CartProvider>
         </AuthProvider>
       </body>

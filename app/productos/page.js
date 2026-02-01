@@ -6,6 +6,7 @@ import ProductCard from '../../components/products/ProductCard'
 import { FiChevronDown } from 'react-icons/fi'
 import axios from 'axios'
 import { API_URL } from '../config'
+import Header from '@/components/layout/Header'
 
 function ProductsContent() {
     const searchParams = useSearchParams()
@@ -296,15 +297,18 @@ function ProductsContent() {
 
 export default function ProductsPage() {
     return (
-        <Suspense fallback={
-            <div className="min-h-screen bg-white flex items-center justify-center">
-                <div className="text-center">
-                    <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-gray-900 border-r-transparent mb-4"></div>
-                    <p className="text-gray-600">Cargando...</p>
+        <>
+            <Header />
+            <Suspense fallback={
+                <div className="min-h-screen bg-white flex items-center justify-center">
+                    <div className="text-center">
+                        <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-gray-900 border-r-transparent mb-4"></div>
+                        <p className="text-gray-600">Cargando...</p>
+                    </div>
                 </div>
-            </div>
-        }>
-            <ProductsContent />
-        </Suspense>
+            }>
+                <ProductsContent />
+            </Suspense>
+        </>
     )
 }

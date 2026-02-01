@@ -35,7 +35,7 @@ export default function RegistroPage() {
                 ...formData,
                 rol: 'cliente',
             })
-            router.push('/mi-cuenta')
+            router.push('/account/orders')
         } catch (error) {
             setError(error.response?.data?.mensaje || 'Error al registrarse')
         } finally {
